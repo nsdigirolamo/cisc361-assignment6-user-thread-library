@@ -1,1 +1,4 @@
 UD_Thread
+test*
+*.o
+*.a

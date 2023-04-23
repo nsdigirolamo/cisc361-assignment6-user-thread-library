@@ -13,4 +13,4 @@ struct tcb {
 	struct tcb *next;
 };
 
-typedef struct tcb tcb; 
+typedef struct tcb tcb_t; 
