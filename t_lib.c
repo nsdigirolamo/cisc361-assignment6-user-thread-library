@@ -129,3 +129,19 @@ void t_shutdown () {
         ready_queue_head = temp;
     }
 }
+
+int sem_init(sem_t **sp, unsigned int count) {
+    return 0;
+}
+
+void sem_wait(sem_t *sp) {
+    return;
+}
+
+void sem_signal(sem_t *sp) {
+    return;
+}
+
+void sem_destroy(sem_t **sp) {
+    return;
+}

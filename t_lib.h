@@ -13,4 +13,11 @@ struct tcb {
 	struct tcb *next;
 };
 
-typedef struct tcb tcb_t; 
+typedef struct tcb tcb_t;
+
+struct semaphore {
+	int count;
+	tcb *q;
+};
+
+typedef struct semaphore sem_t;
