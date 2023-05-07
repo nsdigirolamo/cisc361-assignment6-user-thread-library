@@ -1,6 +1,7 @@
 /*
  * types used by thread library
  */
+ #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ucontext.h>
@@ -17,7 +18,7 @@ typedef struct tcb tcb_t;
 
 struct semaphore {
 	int count;
-	tcb *q;
+	tcb_t *queue;
 };
 
 typedef struct semaphore sem_t;
