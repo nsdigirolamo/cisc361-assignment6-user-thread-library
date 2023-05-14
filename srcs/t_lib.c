@@ -1,7 +1,7 @@
 #include <signal.h>
 #include "t_lib.h"
 
-#define IS_DEBUGGING 0
+#define IS_DEBUGGING 1
 
 tcb_t *running = NULL;
 
@@ -86,9 +86,11 @@ void t_init () {
 
     running = main;
 
-    if (IS_DEBUGGING) { 
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
         printf("\tInitialized main!\n");
         print_tcb(main);
+        printf("\t-------------------------------------------------------\n");
     }
 }
 
@@ -121,9 +123,11 @@ int t_create (void (*fct)(int), int id, int pri) {
         ready_queue_tail = ready_queue_tail->next;
     }
 
-    if (IS_DEBUGGING) { 
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
         printf("\tCreated new TCB!\n");
         print_tcb(control_block);
+        printf("\t-------------------------------------------------------\n");
     }
 }
 
@@ -189,8 +193,10 @@ int sem_init(sem_t **sp, unsigned int count) {
     (*sp)->queue = NULL;
     
     if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
         printf("\tInitialized the following semaphore:\n");
         print_sem(*sp);
+        printf("\t-------------------------------------------------------\n");
     }
 
     return 0;
@@ -213,6 +219,7 @@ void sem_wait(sem_t *sp) {
 
         if (IS_DEBUGGING) {
             printf("\tRunning thread %d added to semaphore's queue. Now yielding...\n", running->thread_id);
+            printf("\t-------------------------------------------------------\n");
             printf("\tYield start!\n");
             printf("\tRunning: %d\n", running->thread_id);
             print_ready_queue();

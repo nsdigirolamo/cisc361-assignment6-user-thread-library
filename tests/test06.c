@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ud_thread.h"
+// TODO: Remove below line before submission. Not part of original test file.
+#include <string.h>
 
 mbox *mb;
 char *msg[2] = {"hello world...", "bye, bye"};
