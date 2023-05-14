@@ -34,9 +34,19 @@ void print_ready_queue () {
 
 void print_tcb (tcb_t *control_block) {
     if (control_block) {
-        printf("\tTCB 0x%08X: {\n\t\tthread_id:       %d\n\t\tthread_priority: %d\n\t\tthread_context:  0x%08X\n\t\tnext:            0x%08X\n\t}\n", control_block, control_block->thread_id, control_block->thread_priority, control_block->thread_context, control_block->next);
+        printf("\tTCB 0x%08X: {\n", control_block);
+        printf("\t\tTID: %d\n", control_block->thread_id);
+        printf("\t\tPriority: %d\n", control_block->thread_priority);
+        printf("\t\tThread Context: 0x%08X\n", control_block->thread_context);
+        if (control_block->next) {
+            printf("\t\tNext: 0x%08X\n", control_block->next);
+        } else {
+            printf("\t\tNext: NULL\n");
+        }
+        
+        printf("\t}\n");
     } else {
-        printf("\tTCB 0x%08X: {\n\t\tthread_id:       NULL\n\t\tthread_priority: NULL\n\t\tthread_context:  NULL\n\t\tnext:            NULL\n\t}\n", control_block);
+        printf("\tTCB 0x%08X: NULL\n", control_block);
     }
 }
 
@@ -319,7 +329,39 @@ void sem_destroy(sem_t **sp) {
     free((*sp));
 }
 
+void print_mbox(mbox *mb) {
+    printf("\tMailbox 0x%08X: {\n");
+    if (mb->mnode) {
+        printf("\t\tMessage Node: 0x%08X: {\n", mb->mnode);
+        printf("\t\t\tMessage: %s\n", mb->mnode->msg);
+        printf("\t\t\tLength: %s\n", mb->mnode->len);
+        printf("\t\t\tSender: %d\n", mb->mnode->sender);
+        printf("\t\t\tReceiver: %d\n", mb->mnode->receiver);
+        printf("\t\t\tNext: 0x%08X\n");
+        printf("\t\t}\n");
+    } else {
+        printf("\t\tMessage Node: NULL\n", mb->mnode);
+    }
+    printf("\t\tSemaphore: 0x%08X\n", mb->sem);
+    printf("\t}\n");
+}
+
 int mbox_create(mbox **mb) {
+
+    sem_t *semaphore;
+    sem_init(&semaphore, 0);
+
+    *mb = (mbox *) malloc(sizeof(mbox));
+    (*mb)->mnode = NULL;
+    (*mb)->sem = semaphore;
+
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tInitialized the following mailbox:\n");
+        print_mbox(*mb);
+        printf("\t-------------------------------------------------------\n");
+    }
+
     return 0;
 }
 

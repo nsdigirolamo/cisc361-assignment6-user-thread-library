@@ -24,7 +24,7 @@ struct semaphore {
 typedef struct semaphore sem_t;
 
 struct messageNode {
-	char *message;     			// copy of the message 
+	char *msg;     				// copy of the message 
 	int  len;          			// length of the message 
 	int  sender;       			// TID of sender thread 
 	int  receiver;     			// TID of receiver thread 
@@ -34,8 +34,8 @@ struct messageNode {
 typedef struct messageNode mnode_t;
 
 struct mailBox {
-	mnode_t *msg;      	// message queue
-	sem_t   *mbox_sem;	// used as lock
+	mnode_t *mnode;	// message queue
+	sem_t   *sem;	// used as lock
 };
 
 typedef struct mailBox mbox;
