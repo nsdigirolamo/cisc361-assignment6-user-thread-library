@@ -528,8 +528,8 @@ void send(int tid, char *msg, int len) {
     message_node->msg = malloc(sizeof(char) * (len + 1));
     strcpy(message_node->msg, msg);
     message_node->len = len;
-    message_node->sender = sender;
-    message_node->receiver = receiver;
+    message_node->sender = sender_id;
+    message_node->receiver = receiver_id;
     
     if (receiving_thread->mb->mnode) {
         message_node->next = receiving_thread->mb->mnode;
