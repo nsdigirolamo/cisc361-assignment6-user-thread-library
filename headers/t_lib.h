@@ -1,7 +1,7 @@
 /*
  * types used by thread library
  */
- #include <signal.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ucontext.h>

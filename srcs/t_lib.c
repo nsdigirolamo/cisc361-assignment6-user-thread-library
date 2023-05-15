@@ -2,6 +2,9 @@
 #include <string.h>
 #include "t_lib.h"
 
+int mbox_create(mbox **mb);
+void mbox_destroy(mbox **mb);
+
 #define IS_DEBUGGING 1
 
 tcb_t *running = NULL;
@@ -89,10 +92,14 @@ void t_init () {
     tmp = (ucontext_t *) malloc(sizeof(ucontext_t));
     getcontext(tmp);    /* let tmp be the context of main() */
 
+    mbox *mb;
+    mbox_create(&mb);
+
     tcb_t *main = malloc(sizeof(tcb_t));
     main->thread_id = 0;
     main->thread_priority = 1;
     main->thread_context = tmp;
+    main->mb = mb;
     main->next = NULL;
 
     running = main;
@@ -120,10 +127,14 @@ int t_create (void (*fct)(int), int id, int pri) {
     uc->uc_link = running->thread_context; 
     makecontext(uc, (void (*)(void)) fct, 1, id);
 
+    mbox *mb;
+    mbox_create(&mb);
+
     tcb_t *control_block = malloc(sizeof(tcb_t));
     control_block->thread_id = id;
     control_block->thread_priority = pri;
     control_block->thread_context = uc;
+    control_block->mb = mb;
     control_block->next = NULL;
 
     if (!ready_queue_head) {
@@ -140,35 +151,6 @@ int t_create (void (*fct)(int), int id, int pri) {
         print_tcb(control_block);
         printf("\t-------------------------------------------------------\n");
     }
-}
-
-void sem_destroy(sem_t **sp) {
-
-    while ((*sp)->queue) {
-        tcb_t *temp = (*sp)->queue->next;
-        free((*sp)->queue->thread_context->uc_stack.ss_sp);
-        free((*sp)->queue->thread_context);
-        free((*sp)->queue);
-        (*sp)->queue = temp;
-    }
-
-    free((*sp));
-}
-
-void mbox_destroy(mbox **mb) {
-
-    mnode_t *message_node = (*mb)->mnode;
-
-    while (message_node) {
-        mnode_t *temp = message_node->next;
-        free(message_node->msg);
-        free(message_node);
-        message_node = temp;
-    }
-
-    sem_destroy(&((*mb)->sem));
-
-    free((*mb));
 }
 
 void t_terminate () {
@@ -190,12 +172,14 @@ void t_shutdown () {
 
     free(running->thread_context->uc_stack.ss_sp);
     free(running->thread_context);
+    mbox_destroy(&(running->mb));
     free(running);
 
     while (ready_queue_head) {
         tcb_t *temp = ready_queue_head->next;
         free(ready_queue_head->thread_context->uc_stack.ss_sp);
         free(ready_queue_head->thread_context);
+        mbox_destroy(&(ready_queue_head->mb));
         free(ready_queue_head);
         ready_queue_head = temp;
     }
@@ -347,6 +331,19 @@ void sem_signal(sem_t *sp) {
     sigrelse(SIGALRM);
 }
 
+void sem_destroy(sem_t **sp) {
+
+    while ((*sp)->queue) {
+        tcb_t *temp = (*sp)->queue->next;
+        free((*sp)->queue->thread_context->uc_stack.ss_sp);
+        free((*sp)->queue->thread_context);
+        free((*sp)->queue);
+        (*sp)->queue = temp;
+    }
+
+    free((*sp));
+}
+
 void print_mbox(mbox *mb) {
     printf("\tMailbox 0x%08X: {\n", mb);
     if (mb->mnode) {
@@ -381,6 +378,22 @@ int mbox_create(mbox **mb) {
     }
 
     return 0;
+}
+
+void mbox_destroy(mbox **mb) {
+
+    mnode_t *message_node = (*mb)->mnode;
+
+    while (message_node) {
+        mnode_t *temp = message_node->next;
+        free(message_node->msg);
+        free(message_node);
+        message_node = temp;
+    }
+
+    sem_destroy(&((*mb)->sem));
+
+    free((*mb));
 }
 
 void mbox_deposit(mbox *mb, char *msg, int len) {
