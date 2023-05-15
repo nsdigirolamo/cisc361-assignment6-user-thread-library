@@ -607,6 +607,8 @@ void receive(int *tid, char *msg, int *len) {
         running->mb->mnode = NULL;
     }
 
+    running->mb->sem->count--;
+
     free(message_node->msg);
     free(message_node);
 }
