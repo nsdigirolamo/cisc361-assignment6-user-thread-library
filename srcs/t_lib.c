@@ -486,7 +486,7 @@ void send(int tid, char *msg, int len) {
         }
     }
 
-    mnode_t message_node = malloc(sizeof(mnode_t));
+    mnode_t *message_node = malloc(sizeof(mnode_t));
     message_node->msg = malloc(sizeof(char) * (len + 1));
     strcpy(message_node->msg, msg);
     message_node->len = len;
@@ -494,12 +494,12 @@ void send(int tid, char *msg, int len) {
     message_node->receiver = receiver;
     
     if (receiving_thread->mb->mnode) {
-        message_node->next = receiving_thread->mb->mnode
+        message_node->next = receiving_thread->mb->mnode;
     } else {
         message_node->next = NULL;
     }
 
-    receiving_thread->mb->mnode = message_node
+    receiving_thread->mb->mnode = message_node;
 
     sem_signal(receiving_thread->mb->sem);
 }
