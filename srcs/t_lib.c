@@ -472,6 +472,36 @@ void mbox_withdraw(mbox *mb, char *msg, int *len) {
 
 void send(int tid, char *msg, int len) {
 
+    int sender = running->thread_id;
+    int receiver = tid;
+
+    tcb_t *receiving_thread;
+
+    if (sender = receiver) {
+        receiving_thread = running;
+    } else {
+        receiving_thread = ready_queue_head;
+        while (receiver != receiving_thread->thread_id) {
+            receiving_thread = receiving_thread->next;
+        }
+    }
+
+    mnode_t message_node = malloc(sizeof(mnode_t));
+    message_node->msg = malloc(sizeof(char) * (len + 1));
+    strcpy(message_node->msg, msg);
+    message_node->len = len;
+    message_node->sender = sender;
+    message_node->receiver = receiver;
+    
+    if (receiving_thread->mb->mnode) {
+        message_node->next = receiving_thread->mb->mnode
+    } else {
+        message_node->next = NULL;
+    }
+
+    receiving_thread->mb->mnode = message_node
+
+    sem_signal(receiving_thread->mb->sem);
 }
 
 void receive(int *tid, char *msg, int *len) {
