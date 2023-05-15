@@ -539,12 +539,12 @@ void send(int tid, char *msg, int len) {
 
     if (IS_DEBUGGING) {
         printf("\tCreated Message Node ----------------------------------\n");
-        printf("\tMessage Node: 0x%08X: {\n", mb->mnode);
-        printf("\t\tMessage: \"%s\"\n", mb->mnode->msg);
-        printf("\t\tLength: %d\n", mb->mnode->len);
-        printf("\t\tSender: %d\n", mb->mnode->sender);
-        printf("\t\tReceiver: %d\n", mb->mnode->receiver);
-        printf("\t\tNext: 0x%08X\n", mb->mnode->next);
+        printf("\tMessage Node: 0x%08X: {\n", message_node);
+        printf("\t\tMessage: \"%s\"\n", message_node->msg);
+        printf("\t\tLength: %d\n", message_node->len);
+        printf("\t\tSender: %d\n", message_node->sender);
+        printf("\t\tReceiver: %d\n", message_node->receiver);
+        printf("\t\tNext: 0x%08X\n", message_node->next);
         printf("\t}\n");
         printf("\t-------------------------------------------------------\n");
     }
