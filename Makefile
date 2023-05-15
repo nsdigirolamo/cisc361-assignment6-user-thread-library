@@ -32,8 +32,11 @@ tests: $(TESTS)
 $(TESTS): %: $(ODIR)/%.o t_lib.a
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(ODIR)/%.o: $(TDIR)/%.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+$(ODIR)/%.o: $(TDIR)/%.c $(ODIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(ODIR):
+	mkdir -p objs
 
 # Target for cleaning
 clean:
