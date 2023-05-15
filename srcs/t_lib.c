@@ -256,7 +256,10 @@ void sem_wait(sem_t *sp) {
 
     sp->count--;
 
-    if (IS_DEBUGGING) { printf("\tCount of semaphore is now %d.\n", sp->count); }
+    if (IS_DEBUGGING) { 
+        printf("\tCount of semaphore is now %d.\n", sp->count);
+        printf("\t-------------------------------------------------------\n");
+    }
 
     if (sp->count < 0) {
 
