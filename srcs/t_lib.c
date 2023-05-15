@@ -1,7 +1,8 @@
 #include <signal.h>
+#include <string.h>
 #include "t_lib.h"
 
-#define IS_DEBUGGING 1
+#define IS_DEBUGGING 0
 
 tcb_t *running = NULL;
 
@@ -330,17 +331,17 @@ void sem_destroy(sem_t **sp) {
 }
 
 void print_mbox(mbox *mb) {
-    printf("\tMailbox 0x%08X: {\n");
+    printf("\tMailbox 0x%08X: {\n", mb);
     if (mb->mnode) {
         printf("\t\tMessage Node: 0x%08X: {\n", mb->mnode);
-        printf("\t\t\tMessage: %s\n", mb->mnode->msg);
-        printf("\t\t\tLength: %s\n", mb->mnode->len);
+        printf("\t\t\tMessage: \"%s\"\n", mb->mnode->msg);
+        printf("\t\t\tLength: %d\n", mb->mnode->len);
         printf("\t\t\tSender: %d\n", mb->mnode->sender);
         printf("\t\t\tReceiver: %d\n", mb->mnode->receiver);
-        printf("\t\t\tNext: 0x%08X\n");
+        printf("\t\t\tNext: 0x%08X\n", mb->mnode->next);
         printf("\t\t}\n");
     } else {
-        printf("\t\tMessage Node: NULL\n", mb->mnode);
+        printf("\t\tMessage Node: NULL\n");
     }
     printf("\t\tSemaphore: 0x%08X\n", mb->sem);
     printf("\t}\n");
@@ -371,10 +372,73 @@ void mbox_destroy(mbox **mb) {
 
 void mbox_deposit(mbox *mb, char *msg, int len) {
 
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tA message was deposited into a mailbox!\n");
+        printf("\tMessage: \"%s\"\n", msg);
+        printf("\tLength: %d\n", len);
+        printf("\tBefore deposit ----------------------------------------\n");
+        print_mbox(mb);
+    }
+
+    char *message = malloc(sizeof(char) * (len + 1));
+    strcpy(message, msg);
+
+    mnode_t *message_node = malloc(sizeof(mnode_t));
+    message_node->msg = message;
+    message_node->len = len;
+    message_node->sender = -1;
+    message_node->receiver = -1;
+
+    if (mb->mnode) {
+        message_node->next = mb->mnode;
+    } else {
+        message_node->next = NULL;
+    }
+
+    mb->mnode = message_node;
+
+    if (IS_DEBUGGING) {
+        printf("\tAfter deposit -----------------------------------------\n");
+        print_mbox(mb);
+        printf("\t-------------------------------------------------------\n");
+    }
 }
 
 void mbox_withdraw(mbox *mb, char *msg, int *len) {
 
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tA message was withdrawn from a mailbox!\n");
+        printf("\tBefore withdrawl --------------------------------------\n");
+        print_mbox(mb);
+    }
+
+    if (!mb->mnode) {
+        *len = 0;
+        return;
+    }
+
+    mnode_t *previous = NULL;
+    mnode_t *message_node = mb->mnode;
+
+    while (message_node->next) {
+        previous = message_node;
+        message_node = message_node->next;
+    }
+
+    strcpy(msg, message_node->msg);
+    *len = message_node->len;
+
+    if (previous) {
+        previous->next = NULL;
+    }
+    
+    if (IS_DEBUGGING) {
+        printf("\tAfter withdrawl ---------------------------------------\n");
+        print_mbox(mb);
+        printf("\t-------------------------------------------------------\n");
+    }
 }
 
 void send(int tid, char *msg, int len) {
