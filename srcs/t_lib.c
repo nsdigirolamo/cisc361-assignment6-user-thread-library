@@ -574,13 +574,17 @@ void receive(int *tid, char *msg, int *len) {
     mnode_t *previous = NULL;
     mnode_t *message_node = running->mb->mnode;
 
+    if (!message_node) {
+        sem_wait(running->mb->sem);
+    }
+
     if (message_node->next) {
         previous = message_node;
         message_node = message_node->next;
     }
 
     if (IS_DEBUGGING) {
-        printf("Earliest message node -----------------------------------\n");
+        printf("\tEarliest message node -----------------------------------\n");
         printf("\tMessage Node: 0x%08X: {\n", message_node);
         printf("\t\tMessage: \"%s\"\n", message_node->msg);
         printf("\t\tLength: %d\n", message_node->len);
