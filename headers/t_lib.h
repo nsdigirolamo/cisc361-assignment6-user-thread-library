@@ -8,9 +8,10 @@
 #include <sys/mman.h>
 
 struct tcb {
-	int         thread_id;
-    int         thread_priority;
+	int thread_id;
+    int thread_priority;
 	ucontext_t *thread_context;
+	struct mailBox *mb;
 	struct tcb *next;
 };
 
@@ -24,18 +25,18 @@ struct semaphore {
 typedef struct semaphore sem_t;
 
 struct messageNode {
-	char *msg;     				// copy of the message 
-	int  len;          			// length of the message 
-	int  sender;       			// TID of sender thread 
-	int  receiver;     			// TID of receiver thread 
-	struct messageNode *next;	// pointer to next node 
+	char *msg;
+	int len;
+	int sender;
+	int receiver;
+	struct messageNode	*next;
 };
 
 typedef struct messageNode mnode_t;
 
 struct mailBox {
-	mnode_t *mnode;	// message queue
-	sem_t   *sem;	// used as lock
+	mnode_t *mnode;
+	sem_t   *sem;
 };
 
 typedef struct mailBox mbox;
