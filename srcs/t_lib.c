@@ -459,6 +459,9 @@ void mbox_withdraw(mbox *mb, char *msg, int *len) {
     if (previous) {
         previous->next = NULL;
     }
+
+    free(message_node->msg);
+    free(message_node);
     
     if (IS_DEBUGGING) {
         printf("\tAfter withdrawl ---------------------------------------\n");
