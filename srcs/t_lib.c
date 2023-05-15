@@ -592,7 +592,7 @@ void receive(int *tid, char *msg, int *len) {
     }
 
     strcpy(msg, message_node->msg);
-    *len = message_node->len:
+    *len = message_node->len;
 
     if (previous) {
         previous->next = NULL;
