@@ -498,10 +498,10 @@ void send(int tid, char *msg, int len) {
     if (IS_DEBUGGING) {
         printf("\t-------------------------------------------------------\n");
         printf("\tA message was sent!\n");
-        printf("Sender TID: %d", sender_id);
-        printf("Receiver TID: %d", receiver_id);
-        printf("Message: \"%s\"", msg);
-        printf("Length: %d", len);
+        printf("\tSender TID: %d\n", sender_id);
+        printf("\tReceiver TID: %d\n", receiver_id);
+        printf("\tMessage: \"%s\"\n", msg);
+        printf("\tLength: %d\n", len);
     }
 
     tcb_lln_t *receiving_thread_node = thread_list;
@@ -518,7 +518,7 @@ void send(int tid, char *msg, int len) {
 
     if (!receiving_thread) {
         if (IS_DEBUGGING) {
-            printf("Could not find any receiver with ID %d. Returning...", receiver_id);
+            printf("\tCould not find any receiver with ID %d. Returning...", receiver_id);
             printf("\t-------------------------------------------------------\n");
         }
         return;
@@ -535,6 +535,18 @@ void send(int tid, char *msg, int len) {
         message_node->next = receiving_thread->mb->mnode;
     } else {
         message_node->next = NULL;
+    }
+
+    if (IS_DEBUGGING) {
+        printf("\tCreated Message Node ----------------------------------\n");
+        printf("\tMessage Node: 0x%08X: {\n", mb->mnode);
+        printf("\t\tMessage: \"%s\"\n", mb->mnode->msg);
+        printf("\t\tLength: %d\n", mb->mnode->len);
+        printf("\t\tSender: %d\n", mb->mnode->sender);
+        printf("\t\tReceiver: %d\n", mb->mnode->receiver);
+        printf("\t\tNext: 0x%08X\n", mb->mnode->next);
+        printf("\t}\n");
+        printf("\t-------------------------------------------------------\n");
     }
 
     receiving_thread->mb->mnode = message_node;
