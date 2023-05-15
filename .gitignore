@@ -3,7 +3,8 @@ partialorder
 philosophers
 rendezvous
 t_lib.a
-objs/*.o
+*.o
 vgcore*
 
 !tests
+!objs

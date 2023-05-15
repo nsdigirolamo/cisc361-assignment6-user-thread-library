@@ -458,6 +458,8 @@ void mbox_withdraw(mbox *mb, char *msg, int *len) {
 
     if (previous) {
         previous->next = NULL;
+    } else {
+        mb->mnode = NULL;
     }
 
     free(message_node->msg);

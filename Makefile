@@ -13,7 +13,7 @@ TESTS = $(TESTSRCS:tests/%.c=%)
 
 CFLAGS = -g -I $(IDIR)
 
-.PHONY: make all tests clean
+.PHONY: make all tests clean $(ODIR)
 
 make: all
 
@@ -29,15 +29,11 @@ $(ODIR)/t_lib.o: $(SDIR)/t_lib.c
 # Targets for all tests
 tests: $(TESTS)
 
-$(TESTS): %: $(ODIR)/%.o t_lib.a 
+$(TESTS): %: $(ODIR)/%.o t_lib.a
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(ODIR)/%.o: $(TDIR)/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@
-
-# Target for the objs directory if it doesn't exist.
-$(ODIR):
-	mkdir -p $@
 
 # Target for cleaning
 clean:
