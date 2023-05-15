@@ -17,6 +17,13 @@ struct tcb {
 
 typedef struct tcb tcb_t;
 
+struct tcb_linked_list_node {
+	tcb_t *tcb;
+	struct tcb_linked_list_node *next;
+}
+
+typedef struct tcb_linked_list_node tcb_lln_t;
+
 struct semaphore {
 	int count;
 	tcb_t *queue;

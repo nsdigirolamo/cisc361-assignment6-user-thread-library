@@ -12,6 +12,8 @@ tcb_t *running = NULL;
 tcb_t *ready_queue_head = NULL;
 tcb_t *ready_queue_tail = NULL;
 
+tcb_lln_t *thread_list = NULL;
+
 void print_ready_queue () {
     printf("\tReady Queue: ");
     if (ready_queue_head) {
@@ -102,6 +104,11 @@ void t_init () {
     main->mb = mb;
     main->next = NULL;
 
+    tcb_lln_t *node = malloc(sizeof(tcb_lln_t));
+    node->tcb = main;
+    node->next = NULL;
+    thread_list = node;
+
     running = main;
 
     if (IS_DEBUGGING) {
@@ -136,6 +143,11 @@ int t_create (void (*fct)(int), int id, int pri) {
     control_block->thread_context = uc;
     control_block->mb = mb;
     control_block->next = NULL;
+
+    tcb_lln_t *node = malloc(sizeof(tcb_lln_t));
+    node->tcb = control_block;
+    node->next = thread_list;
+    thread_list = node;
 
     if (!ready_queue_head) {
         ready_queue_head = control_block;
@@ -182,6 +194,12 @@ void t_shutdown () {
         mbox_destroy(&(ready_queue_head->mb));
         free(ready_queue_head);
         ready_queue_head = temp;
+    }
+
+    while (thread_list) {
+        tcb_lln_t *temp = thread_list->next
+        free(thread_list);
+        thread_list = temp;
     }
 }
 
@@ -474,18 +492,36 @@ void mbox_withdraw(mbox *mb, char *msg, int *len) {
 
 void send(int tid, char *msg, int len) {
 
-    int sender = running->thread_id;
-    int receiver = tid;
+    int sender_id = running->thread_id;
+    int receiver_id = tid;
 
-    tcb_t *receiving_thread;
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tA message was sent!\n");
+        printf("Sender TID: %d", sender_id);
+        printf("Receiver TID: %d", receiver_id);
+        printf("Message: \"%s\"", msg);
+        printf("Length: %d", len);
+    }
 
-    if (sender = receiver) {
-        receiving_thread = running;
-    } else {
-        receiving_thread = ready_queue_head;
-        while (receiver != receiving_thread->thread_id) {
-            receiving_thread = receiving_thread->next;
+    tcb_lln_t *receiving_thread_node = thread_list;
+    tcb_t *receiving_thread = NULL;
+
+    while (receiving_thread_node) {
+        if (receiving_thread_node->tcb->thread_id == receiver_id) {
+            receiving_thread = receiving_thread_node->tcb;
+            break; 
+        } else {
+            receiving_thread_node = receiving_thread_node->next;
         }
+    }
+
+    if (!receiving_thread) {
+        if (IS_DEBUGGING) {
+            printf("Could not find any receiver with ID %d. Returning...", receiver_id);
+            printf("\t-------------------------------------------------------\n");
+        }
+        return;
     }
 
     mnode_t *message_node = malloc(sizeof(mnode_t));
