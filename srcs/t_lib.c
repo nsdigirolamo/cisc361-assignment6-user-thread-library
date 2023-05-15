@@ -388,7 +388,7 @@ void print_mbox(mbox *mb) {
 int mbox_create(mbox **mb) {
 
     sem_t *semaphore;
-    sem_init(&semaphore, 0);
+    sem_init(&semaphore, -1);
 
     *mb = (mbox *) malloc(sizeof(mbox));
     (*mb)->mnode = NULL;
