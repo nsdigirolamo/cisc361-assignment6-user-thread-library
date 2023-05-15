@@ -310,7 +310,10 @@ void sem_signal(sem_t *sp) {
 
     sp->count++;
 
-    if (IS_DEBUGGING) { printf("\tCount increased to %d\n", sp->count); }
+    if (IS_DEBUGGING) { 
+        printf("\tCount increased to %d\n", sp->count);
+        printf("\t-------------------------------------------------------\n");
+    }
 
     if (sp->queue) {
 
@@ -556,4 +559,47 @@ void send(int tid, char *msg, int len) {
 
 void receive(int *tid, char *msg, int *len) {
 
+    int sender_id = *tid;
+    int receiver_id = running->thread_id;
+
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tTrying to receive a message!\n");
+        printf("\tSender TID: %d\n", sender_id);
+        printf("\tReceiver TID: %d\n", receiver_id);
+        printf("\tReceiver Mailbox --------------------------------------\n");
+        print_mbox(running->mb);
+    }
+
+    mnode_t *previous = NULL;
+    mnode_t *message_node = running->mb->mnode;
+
+    if (message_node->next) {
+        previous = message_node;
+        message_node = message_node->next;
+    }
+
+    if (IS_DEBUGGING) {
+        printf("Earliest message node -----------------------------------\n");
+        printf("\tMessage Node: 0x%08X: {\n", message_node);
+        printf("\t\tMessage: \"%s\"\n", message_node->msg);
+        printf("\t\tLength: %d\n", message_node->len);
+        printf("\t\tSender: %d\n", message_node->sender);
+        printf("\t\tReceiver: %d\n", message_node->receiver);
+        printf("\t\tNext: 0x%08X\n", message_node->next);
+        printf("\t}\n");
+        printf("\t-------------------------------------------------------\n");
+    }
+
+    strcpy(msg, message_node->msg);
+    *len = message_node->len:
+
+    if (previous) {
+        previous->next = NULL;
+    } else {
+        running->mb->mnode = NULL;
+    }
+
+    free(message_node->msg);
+    free(message_node);
 }
