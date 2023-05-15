@@ -1,3 +1,9 @@
-UD_Thread
-*.o
+*test*
+partialorder
+philosophers
+rendezvous
+t_lib.a
+objs/*.o
 vgcore*
+
+!tests
