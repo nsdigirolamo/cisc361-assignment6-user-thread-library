@@ -197,7 +197,7 @@ void t_shutdown () {
     }
 
     while (thread_list) {
-        tcb_lln_t *temp = thread_list->next
+        tcb_lln_t *temp = thread_list->next;
         free(thread_list);
         thread_list = temp;
     }
