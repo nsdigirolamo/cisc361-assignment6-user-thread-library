@@ -1,11 +1,12 @@
 #include <signal.h>
 #include <string.h>
+#include <stdbool.h>
 #include "t_lib.h"
 
 int mbox_create(mbox **mb);
 void mbox_destroy(mbox **mb);
 
-#define IS_DEBUGGING 1
+#define IS_DEBUGGING true
 
 tcb_t *running = NULL;
 
@@ -385,6 +386,15 @@ void print_mbox(mbox *mb) {
     printf("\t}\n");
 }
 
+void print_mnode_list(mnode_t *node) {
+    printf("\t");
+    while (node) {
+        printf("0x%08X -> ", node);
+        node = node->next;
+    }
+    printf("NULL\n");
+}
+
 int mbox_create(mbox **mb) {
 
     sem_t *semaphore;
@@ -577,43 +587,65 @@ void receive(int *tid, char *msg, int *len) {
     }
 
     mnode_t *previous = NULL;
-    mnode_t *message_node = running->mb->mnode;
+    mnode_t *current = running->mb->mnode;
+    mnode_t *found = NULL;
 
-    if (!message_node) {
+    if (!current) {
         sem_wait(running->mb->sem);
     }
 
-    if (IS_DEBUGGING) { printf("\tSequence: "); }
-    while (message_node->next) {
-        previous = message_node;
-        message_node = message_node->next;
-        if (IS_DEBUGGING) { printf("0x%08X -> ", previous); }
+    if (sender_id == 0) {
+        while (current->next) {
+            previous = current;
+            current = current->next;
+        }
+        found = current;
+    } else {
+        while (current) {
+            if (current->sender == sender_id) { 
+                found = current;
+                break;
+            }
+            previous = current;
+            current = current->next;
+        }
     }
-    if (IS_DEBUGGING) { printf("NULL\n"); }
 
     if (IS_DEBUGGING) {
-        printf("\tEarliest message node -----------------------------------\n");
-        printf("\tMessage Node: 0x%08X: {\n", message_node);
-        printf("\t\tMessage: \"%s\"\n", message_node->msg);
-        printf("\t\tLength: %d\n", message_node->len);
-        printf("\t\tSender: %d\n", message_node->sender);
-        printf("\t\tReceiver: %d\n", message_node->receiver);
-        printf("\t\tNext: 0x%08X\n", message_node->next);
-        printf("\t}\n");
+        printf("\tMessage Node Sequence ---------------------------------\n");
+        print_mnode_list(message_node);
+        printf("\t-------------------------------------------------------\n");
+        if (found) {
+            printf("\tFound Node --------------------------------------------\n");
+            printf("\tMessage Node: 0x%08X: {\n", message_node);
+            printf("\t\tMessage: \"%s\"\n", message_node->msg);
+            printf("\t\tLength: %d\n", message_node->len);
+            printf("\t\tSender: %d\n", message_node->sender);
+            printf("\t\tReceiver: %d\n", message_node->receiver);
+            printf("\t\tNext: 0x%08X\n", message_node->next);
+            printf("\t}\n");
+        } else {
+            printf("\tCould not find a matching node.\n");
+        }
         printf("\t-------------------------------------------------------\n");
     }
 
-    strcpy(msg, message_node->msg);
-    *len = message_node->len;
+    if (found) {
+        strcpy(msg, message_node->msg);
+        *len = message_node->len;
 
-    if (previous) {
-        previous->next = NULL;
+        if (previous) {
+            previous->next = found->next;
+        } else {
+            running->mb->mnode = NULL;
+        }
+
+        running->mb->sem->count--;
+
+        free(message_node->msg);
+        free(message_node);
     } else {
-        running->mb->mnode = NULL;
+        *len = 0;
+        return 0;
     }
-
-    running->mb->sem->count--;
-
-    free(message_node->msg);
-    free(message_node);
 }
