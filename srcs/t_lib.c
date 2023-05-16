@@ -39,12 +39,24 @@ void print_ready_queue () {
     }
 }
 
+void print_thread_list () {
+    printf("\tThread List: ");
+    if (thread_list) {
+        tcb_lln_t *temp = thread_list;
+        while (temp) {
+            printf("0x%08X -> ", temp);
+        }
+    }
+    printf("NULL\n");
+}
+
 void print_tcb (tcb_t *control_block) {
     if (control_block) {
         printf("\tTCB 0x%08X: {\n", control_block);
         printf("\t\tTID: %d\n", control_block->thread_id);
         printf("\t\tPriority: %d\n", control_block->thread_priority);
         printf("\t\tThread Context: 0x%08X\n", control_block->thread_context);
+        printf("\t\tMailbox: 0x%08X\n", control_block->mb);
         if (control_block->next) {
             printf("\t\tNext: 0x%08X\n", control_block->next);
         } else {
