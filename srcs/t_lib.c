@@ -617,12 +617,12 @@ void receive(int *tid, char *msg, int *len) {
         printf("\t-------------------------------------------------------\n");
         if (found) {
             printf("\tFound Node --------------------------------------------\n");
-            printf("\tMessage Node: 0x%08X: {\n", message_node);
-            printf("\t\tMessage: \"%s\"\n", message_node->msg);
-            printf("\t\tLength: %d\n", message_node->len);
-            printf("\t\tSender: %d\n", message_node->sender);
-            printf("\t\tReceiver: %d\n", message_node->receiver);
-            printf("\t\tNext: 0x%08X\n", message_node->next);
+            printf("\tMessage Node: 0x%08X: {\n", found);
+            printf("\t\tMessage: \"%s\"\n", found->msg);
+            printf("\t\tLength: %d\n", found->len);
+            printf("\t\tSender: %d\n", found->sender);
+            printf("\t\tReceiver: %d\n", found->receiver);
+            printf("\t\tNext: 0x%08X\n", found->next);
             printf("\t}\n");
         } else {
             printf("\tCould not find a matching node.\n");
