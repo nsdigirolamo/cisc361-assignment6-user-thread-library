@@ -613,7 +613,7 @@ void receive(int *tid, char *msg, int *len) {
 
     if (IS_DEBUGGING) {
         printf("\tMessage Node Sequence ---------------------------------\n");
-        print_mnode_list(message_node);
+        print_mnode_list(running->mb->mnode);
         printf("\t-------------------------------------------------------\n");
         if (found) {
             printf("\tFound Node --------------------------------------------\n");
