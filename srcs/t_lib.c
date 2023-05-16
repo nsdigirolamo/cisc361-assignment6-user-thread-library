@@ -585,9 +585,9 @@ void receive(int *tid, char *msg, int *len) {
     printf("\tSequence:");
 
     if (message_node->next) {
-        printf(" 0x%08X ->", message_node);
         previous = message_node;
         message_node = message_node->next;
+        printf(" 0x%08X ->", previous);
     }
 
     printf(" NULL\n");
