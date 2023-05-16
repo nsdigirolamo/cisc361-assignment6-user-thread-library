@@ -6,7 +6,7 @@
 int mbox_create(mbox **mb);
 void mbox_destroy(mbox **mb);
 
-#define IS_DEBUGGING false
+#define IS_DEBUGGING true
 
 tcb_t *running = NULL;
 
