@@ -23,3 +23,6 @@ void mbox_deposit(mbox *mb, char *msg, int len);
 void mbox_withdraw(mbox *mb, char *msg, int *len);
 void send(int tid, char *msg, int len);
 void receive(int *tid, char *msg, int *len);
+
+void block_send(int tid, char *msg, int length);
+void block_receive(int *tid, char *msg, int *length);

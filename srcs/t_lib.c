@@ -649,4 +649,82 @@ void receive(int *tid, char *msg, int *len) {
         *len = 0;
         return 0;
     }
+
+    void block_send(int tid, char *msg, int length) {
+        int sender_id = running->thread_id;
+        int receiver_id = tid;
+
+        if (IS_DEBUGGING) {
+            printf("\t-------------------------------------------------------\n");
+            printf("\tA message was sent with blocking!\n");
+            printf("\tSender TID: %d\n", sender_id);
+            printf("\tReceiver TID: %d\n", receiver_id);
+            printf("\tMessage: \"%s\"\n", msg);
+            printf("\tLength: %d\n", len);
+        }
+
+        tcb_lln_t *receiving_thread_node = thread_list;
+        tcb_t *receiving_thread = NULL;
+
+        while (receiving_thread_node) {
+            if (receiving_thread_node->tcb->thread_id == receiver_id) {
+                receiving_thread = receiving_thread_node->tcb;
+                break; 
+            } else {
+                receiving_thread_node = receiving_thread_node->next;
+            }
+        }
+
+        if (!receiving_thread) {
+            if (IS_DEBUGGING) {
+                printf("\tCould not find any receiver with ID %d. Returning...", receiver_id);
+                printf("\t-------------------------------------------------------\n");
+            }
+            return;
+        }
+
+        mnode_t *message_node = malloc(sizeof(mnode_t));
+        message_node->msg = malloc(sizeof(char) * (len + 1));
+        strcpy(message_node->msg, msg);
+        message_node->len = len;
+        message_node->sender = sender_id;
+        message_node->receiver = receiver_id;
+        
+        if (receiving_thread->mb->mnode) {
+            message_node->next = receiving_thread->mb->mnode;
+        } else {
+            message_node->next = NULL;
+        }
+
+        if (IS_DEBUGGING) {
+            printf("\tCreated Message Node ----------------------------------\n");
+            printf("\tMessage Node: 0x%08X: {\n", message_node);
+            printf("\t\tMessage: \"%s\"\n", message_node->msg);
+            printf("\t\tLength: %d\n", message_node->len);
+            printf("\t\tSender: %d\n", message_node->sender);
+            printf("\t\tReceiver: %d\n", message_node->receiver);
+            printf("\t\tNext: 0x%08X\n", message_node->next);
+            printf("\t}\n");
+            printf("\t-------------------------------------------------------\n");
+        }
+
+        receiving_thread->mb->mnode = message_node;
+
+        sem_signal(receiving_thread->mb->sem);
+
+        mnode_t *node = receiving_thread->mb->mnode
+
+        while (node) {
+            if (node == message_node) {
+                node = receiving_thread->mb->mnode;
+                t_yield();
+            } else {
+                node = node->next;
+            }
+        }
+    }
+
+    void block_receive(int *tid, char *msg, int *length) {
+
+    }
 }
