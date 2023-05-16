@@ -23,7 +23,8 @@ void print_ready_queue () {
             printf("%d -> ", temp->thread_id);
             temp = temp->next;
         }
-    printf("NULL\n");
+        printf("NULL\n");
+    }
 }
 
 void print_thread_list () {
