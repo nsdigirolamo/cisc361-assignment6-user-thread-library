@@ -124,7 +124,7 @@ void t_terminate () {
     printf("--- Freed 0x%08X in function t_terminate\n", temp->thread_context);
     mbox_destroy(&(temp->mb));
     free(temp);
-    printf("-- Freed 0x%08X in function t_terminate\n", temp);
+    printf("--- Freed 0x%08X in function t_terminate\n", temp);
 
     setcontext(running->thread_context);
 }
