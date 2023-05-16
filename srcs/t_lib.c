@@ -68,6 +68,7 @@ void t_yield () {
 
     if (!ready_queue_head) {
         if (IS_DEBUGGING) { printf("\tNo ready thread to yield to. Resetting context to running.\n"); }
+        printf("\t-------------------------------------------------------\n");
         setcontext(running->thread_context);
     }
 
@@ -677,7 +678,7 @@ void block_send(int tid, char *msg, int length) {
 
     if (!receiving_thread) {
         if (IS_DEBUGGING) {
-            printf("\tCould not find any receiver with ID %d. Returning...", receiver_id);
+            printf("\tCould not find any receiver with ID %d. Returning...\n", receiver_id);
             printf("\t-------------------------------------------------------\n");
         }
         return;
