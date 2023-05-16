@@ -631,8 +631,8 @@ void receive(int *tid, char *msg, int *len) {
     }
 
     if (found) {
-        strcpy(msg, message_node->msg);
-        *len = message_node->len;
+        strcpy(msg, found->msg);
+        *len = found->len;
 
         if (previous) {
             previous->next = found->next;
@@ -642,8 +642,8 @@ void receive(int *tid, char *msg, int *len) {
 
         running->mb->sem->count--;
 
-        free(message_node->msg);
-        free(message_node);
+        free(found->msg);
+        free(found);
     } else {
         *len = 0;
         return 0;
