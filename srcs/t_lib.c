@@ -684,7 +684,7 @@ void block_send(int tid, char *msg, int length) {
     }
 
     mnode_t *message_node = malloc(sizeof(mnode_t));
-    message_node->msg = malloc(sizeof(char) * (len + 1));
+    message_node->msg = malloc(sizeof(char) * (length + 1));
     strcpy(message_node->msg, msg);
     message_node->len = len;
     message_node->sender = sender_id;
@@ -712,7 +712,7 @@ void block_send(int tid, char *msg, int length) {
 
     sem_signal(receiving_thread->mb->sem);
 
-    mnode_t *node = receiving_thread->mb->mnode;clear
+    mnode_t *node = receiving_thread->mb->mnode;
 
     while (node) {
         if (node == message_node) {
