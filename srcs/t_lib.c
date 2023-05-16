@@ -19,24 +19,11 @@ void print_ready_queue () {
     printf("\tReady Queue: ");
     if (ready_queue_head) {
         tcb_t *temp = ready_queue_head;
-        int head_id = ready_queue_head->thread_id;
-        int loop_flag = 1;
         while (temp) {
             printf("%d -> ", temp->thread_id);
-            if (temp->thread_id == head_id) { 
-                loop_flag--;
-                if (loop_flag < 0) { break; }
-            }
             temp = temp->next;
         }
-        if (loop_flag < 0) {
-            printf("LOOP\n");
-        } else {
-            printf("NULL\n");
-        }
-    } else {
-        printf("NULL\n");
-    }
+    printf("NULL\n");
 }
 
 void print_thread_list () {
@@ -44,7 +31,7 @@ void print_thread_list () {
     if (thread_list) {
         tcb_lln_t *temp = thread_list;
         while (temp) {
-            printf("0x%08X : %d -> ", temp->tcb, temp->tcb->thread_id);
+            printf("%d -> ", temp->tcb->thread_id);
             temp = temp->next;
         }
     }
@@ -54,7 +41,7 @@ void print_thread_list () {
 void print_tcb (tcb_t *control_block) {
     if (control_block) {
         printf("\tTCB 0x%08X: {\n", control_block);
-        printf("\t\tTID: %d\n", control_block->thread_id);
+        printf("\t\tID: %d\n", control_block->thread_id);
         printf("\t\tPriority: %d\n", control_block->thread_priority);
         printf("\t\tThread Context: 0x%08X\n", control_block->thread_context);
         printf("\t\tMailbox: 0x%08X\n", control_block->mb);
@@ -63,7 +50,6 @@ void print_tcb (tcb_t *control_block) {
         } else {
             printf("\t\tNext: NULL\n");
         }
-        
         printf("\t}\n");
     } else {
         printf("\tTCB 0x%08X: NULL\n", control_block);
@@ -82,7 +68,7 @@ void t_yield () {
     if (!ready_queue_head) {
         if (IS_DEBUGGING) { 
             printf("\tNo ready thread to yield to. Resetting context to running.\n");
-            printf("\t-------------------------------------------------------\n");
+        printf("\t-------------------------------------------------------\n");
         }
         
         setcontext(running->thread_context);
@@ -219,6 +205,13 @@ void t_terminate () {
 
 void t_shutdown () {
 
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tShutting down!\n");
+        printf("\tFreeing Thread ----------------------------------------\n");
+        print_tcb(running);
+    }
+
     free(running->thread_context->uc_stack.ss_sp);
     free(running->thread_context);
     mbox_destroy(&(running->mb));
@@ -226,6 +219,10 @@ void t_shutdown () {
 
     while (ready_queue_head) {
         tcb_t *temp = ready_queue_head->next;
+        if (IS_DEBUGGING) {
+            printf("\tFreeing Thread ----------------------------------------\n");
+            print_tcb(ready_queue_head);
+        }
         free(ready_queue_head->thread_context->uc_stack.ss_sp);
         free(ready_queue_head->thread_context);
         mbox_destroy(&(ready_queue_head->mb));
@@ -234,6 +231,10 @@ void t_shutdown () {
     }
 
     while (thread_list) {
+        if (IS_DEBUGGING) {
+            printf("\tFreeing Thread Linked List Node -----------------------\n");
+            print_tcb(ready_queue_head);
+        }
         tcb_lln_t *temp = thread_list->next;
         free(thread_list);
         thread_list = temp;
