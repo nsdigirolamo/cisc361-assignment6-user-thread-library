@@ -6,7 +6,7 @@
 int mbox_create(mbox **mb);
 void mbox_destroy(mbox **mb);
 
-#define IS_DEBUGGING true
+#define IS_DEBUGGING false
 
 tcb_t *running = NULL;
 
@@ -44,8 +44,8 @@ void print_thread_list () {
     if (thread_list) {
         tcb_lln_t *temp = thread_list;
         while (temp) {
-            printf("0x%08X -> ", temp->tcb->thread_id);
-            temp->next;
+            printf("0x%08X : %d -> ", temp->tcb, temp->tcb->thread_id);
+            temp = temp->next;
         }
     }
     printf("NULL\n");
@@ -80,8 +80,11 @@ void t_yield () {
     }
 
     if (!ready_queue_head) {
-        if (IS_DEBUGGING) { printf("\tNo ready thread to yield to. Resetting context to running.\n"); }
-        printf("\t-------------------------------------------------------\n");
+        if (IS_DEBUGGING) { 
+            printf("\tNo ready thread to yield to. Resetting context to running.\n");
+            printf("\t-------------------------------------------------------\n");
+        }
+        
         setcontext(running->thread_context);
     }
 
@@ -161,8 +164,13 @@ int t_create (void (*fct)(int), int id, int pri) {
 
     tcb_lln_t *node = malloc(sizeof(tcb_lln_t));
     node->tcb = control_block;
-    node->next = thread_list;
-    thread_list = node;
+    node->next = NULL;
+    
+    tcb_lln_t *temp = thread_list;
+    while (temp->next) {
+        temp = temp->next;
+    }
+    temp->next = node;
 
     if (!ready_queue_head) {
         ready_queue_head = control_block;
@@ -183,6 +191,13 @@ int t_create (void (*fct)(int), int id, int pri) {
 void t_terminate () {
 
     tcb_t *temp = running;
+
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tTerminating the following thread:\n");
+        print_tcb(temp);
+    }
+
     running = ready_queue_head;
     ready_queue_head = ready_queue_head->next;
     running->next = NULL;
@@ -191,6 +206,13 @@ void t_terminate () {
     free(temp->thread_context);
     mbox_destroy(&(temp->mb));
     free(temp);
+
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tTerminated. Now running the following thread:\n");
+        print_tcb(running);
+        printf("\t-------------------------------------------------------\n");
+    }
 
     setcontext(running->thread_context);
 }
@@ -730,16 +752,91 @@ void block_send(int tid, char *msg, int length) {
 
     mnode_t *node = receiving_thread->mb->mnode;
 
-    while (node) {
-        if (node == message_node) {
-            node = receiving_thread->mb->mnode;
-            t_yield();
-        } else {
-            node = node->next;
-        }
-    }
+    t_yield();
 }
 
 void block_receive(int *tid, char *msg, int *length) {
+
+    int sender_id = *tid;
+    int receiver_id = running->thread_id;
+
+    if (IS_DEBUGGING) {
+        printf("\t-------------------------------------------------------\n");
+        printf("\tTrying to receive a message with blocking!\n");
+        printf("\tSender TID: %d\n", sender_id);
+        printf("\tReceiver TID: %d\n", receiver_id);
+        printf("\tReceiver ----------------------------------------------\n");
+        print_tcb(running);
+        printf("\tReceiver Mailbox --------------------------------------\n");
+        print_mbox(running->mb);
+    }
+
+    mnode_t *previous = NULL;
+    mnode_t *current = running->mb->mnode;
+    mnode_t *found = NULL;
+
+    if (!current) {
+        sem_wait(running->mb->sem);
+        current = running->mb->mnode;
+    }
+
+    if (IS_DEBUGGING) {
+        printf("\tMessage Node Sequence ---------------------------------\n");
+        printf("\tLooking for node with sender ID %d\n", sender_id);
+        printf("\tLooking in the following mailbox:\n");
+        print_mbox(running->mb);
+    }
+
+    if (sender_id == 0) {
+        while (current->next) {
+            previous = current;
+            current = current->next;
+        }
+        found = current;
+    } else {
+        while (current) {
+            if (current->sender == sender_id) { 
+                found = current;
+                break;
+            }
+            previous = current;
+            current = current->next;
+        }
+    }
+
+    if (IS_DEBUGGING) {
+        if (found) {
+            printf("\tFound Node --------------------------------------------\n");
+            printf("\tMessage Node: 0x%08X: {\n", found);
+            printf("\t\tMessage: \"%s\"\n", found->msg);
+            printf("\t\tLength: %d\n", found->len);
+            printf("\t\tSender: %d\n", found->sender);
+            printf("\t\tReceiver: %d\n", found->receiver);
+            printf("\t\tNext: 0x%08X\n", found->next);
+            printf("\t}\n");
+        } else {
+            printf("\tCould not find a matching node.\n");
+        }
+        printf("\t-------------------------------------------------------\n");
+    }
+
+    if (found) {
+        *tid = found->sender;
+        strcpy(msg, found->msg);
+        *length = found->len;
+
+        if (previous) {
+            previous->next = found->next;
+        } else {
+            running->mb->mnode = NULL;
+        }
+
+        running->mb->sem->count--;
+
+        free(found->msg);
+        free(found);
+    } else {
+        *length = 0;
+    }
 
 }
