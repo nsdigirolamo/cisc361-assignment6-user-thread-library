@@ -631,6 +631,7 @@ void receive(int *tid, char *msg, int *len) {
     }
 
     if (found) {
+        *tid = found->sender;
         strcpy(msg, found->msg);
         *len = found->len;
 
