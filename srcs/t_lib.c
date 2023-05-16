@@ -583,7 +583,7 @@ void receive(int *tid, char *msg, int *len) {
         sem_wait(running->mb->sem);
     }
 
-    printf("Sequence: ")
+    printf("Sequence: ");
     while (message_node->next) {
         previous = message_node;
         message_node = message_node->next;
