@@ -424,7 +424,7 @@ void receive(int *tid, char *msg, int *len) {
         running->mb->sem->count--;
 
         free(found->msg);
-        printf("--- Freed 0x%08X in function mbox_withdraw\n" found->msg);
+        printf("--- Freed 0x%08X in function mbox_withdraw\n", found->msg);
         free(found);
         printf("--- Freed 0x%08X in function mbox_withdraw\n", found);
     } else {
