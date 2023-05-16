@@ -44,7 +44,8 @@ void print_thread_list () {
     if (thread_list) {
         tcb_lln_t *temp = thread_list;
         while (temp) {
-            printf("0x%08X -> ", temp);
+            printf("0x%08X -> ", temp->tcb->thread_id);
+            temp->next;
         }
     }
     printf("NULL\n");
