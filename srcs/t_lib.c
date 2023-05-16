@@ -570,6 +570,8 @@ void receive(int *tid, char *msg, int *len) {
         printf("\tTrying to receive a message!\n");
         printf("\tSender TID: %d\n", sender_id);
         printf("\tReceiver TID: %d\n", receiver_id);
+        printf("\tReceiver ----------------------------------------------\n");
+        print_tcb(running);
         printf("\tReceiver Mailbox --------------------------------------\n");
         print_mbox(running->mb);
     }
@@ -581,18 +583,16 @@ void receive(int *tid, char *msg, int *len) {
         sem_wait(running->mb->sem);
     }
 
-    printf("\tEarliest message node -----------------------------------\n");
-    printf("\tSequence:");
-
-    if (message_node->next) {
+    printf("Sequence: ")
+    while (message_node->next) {
         previous = message_node;
         message_node = message_node->next;
-        printf(" 0x%08X ->", previous);
+        printf("0x%08X -> ", previous);
     }
-
-    printf(" NULL\n");
+    printf("NULL");
 
     if (IS_DEBUGGING) {
+        printf("\tEarliest message node -----------------------------------\n");
         printf("\tMessage Node: 0x%08X: {\n", message_node);
         printf("\t\tMessage: \"%s\"\n", message_node->msg);
         printf("\t\tLength: %d\n", message_node->len);
