@@ -712,7 +712,7 @@ void receive(int *tid, char *msg, int *len) {
 
         sem_signal(receiving_thread->mb->sem);
 
-        mnode_t *node = receiving_thread->mb->mnode
+        mnode_t *node = receiving_thread->mb->mnode;
 
         while (node) {
             if (node == message_node) {
