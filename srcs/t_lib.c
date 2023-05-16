@@ -203,19 +203,19 @@ void t_terminate () {
     running->next = NULL;
 
     if (IS_DEBUGGING) {
-        printf("\tFreeing thread_context->uc_stack.ss_sp at 0x%08X", temp->thread_context->uc_stack.ss_sp);
+        printf("\tFreeing thread_context->uc_stack.ss_sp at 0x%08X\n", temp->thread_context->uc_stack.ss_sp);
     }
     free(temp->thread_context->uc_stack.ss_sp);
     if (IS_DEBUGGING) {
-        printf("\tFreeing thread_context at 0x%08X", temp->thread_context);
+        printf("\tFreeing thread_context at 0x%08X\n", temp->thread_context);
     }
     free(temp->thread_context);
     if (IS_DEBUGGING) {
-        printf("\tFreeing mailbox at 0x%08X", &(temp->mb));
+        printf("\tFreeing mailbox at 0x%08X\n", &(temp->mb));
     }
     mbox_destroy(&(temp->mb));
     if (IS_DEBUGGING) {
-        printf("\tFreeing thread control block 0x%08X", temp);
+        printf("\tFreeing thread control block 0x%08X\n", temp);
     }
     free(temp);
 
