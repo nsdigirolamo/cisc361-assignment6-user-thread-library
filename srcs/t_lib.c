@@ -39,14 +39,14 @@ void t_init () {
 
     ucontext_t *tmp;
     tmp = (ucontext_t *) malloc(sizeof(ucontext_t));
-    printf("Allocated %d bytes at 0x%08X for tmp in function t_init()\n", sizeof(ucontext_t), tmp);
+    printf("+++ Allocated %d bytes at 0x%08X for tmp in function t_init()\n", sizeof(ucontext_t), tmp);
     getcontext(tmp);    /* let tmp be the context of main() */
 
     mbox *mb;
     mbox_create(&mb);
 
     tcb_t *main = malloc(sizeof(tcb_t));
-    printf("Allocated %d bytes at 0x%08X for *main in function t_init()\n", sizeof(tcb_t), main);
+    printf("+++ Allocated %d bytes at 0x%08X for *main in function t_init()\n", sizeof(tcb_t), main);
     main->thread_id = 0;
     main->thread_priority = 1;
     main->thread_context = tmp;
@@ -54,7 +54,7 @@ void t_init () {
     main->next = NULL;
 
     tcb_lln_t *node = malloc(sizeof(tcb_lln_t));
-    printf("Allocated %d bytes at 0x%08X for *node in function t_init()\n", sizeof(tcb_lln_t), node);
+    printf("+++ Allocated %d bytes at 0x%08X for *node in function t_init()\n", sizeof(tcb_lln_t), node);
     node->tcb = main;
     node->next = NULL;
     thread_list = node;
@@ -68,12 +68,12 @@ int t_create (void (*fct)(int), int id, int pri) {
 
     ucontext_t *uc;
     uc = (ucontext_t *) malloc(sizeof(ucontext_t));
-    printf("Allocated %d bytes at 0x%08X for uc in function t_create()\n", sizeof(ucontext_t), uc);
+    printf("+++ Allocated %d bytes at 0x%08X for uc in function t_create()\n", sizeof(ucontext_t), uc);
 
     getcontext(uc);
 
     uc->uc_stack.ss_sp = malloc(sz);  /* new statement */
-    printf("Allocated %d bytes at 0x%08X for uc->uc_stack.ss_sp in function t_create()\n", sz, uc->uc_stack.ss_sp);
+    printf("+++ Allocated %d bytes at 0x%08X for uc->uc_stack.ss_sp in function t_create()\n", sz, uc->uc_stack.ss_sp);
     uc->uc_stack.ss_size = sz;
     uc->uc_stack.ss_flags = 0;
     uc->uc_link = running->thread_context; 
@@ -83,7 +83,7 @@ int t_create (void (*fct)(int), int id, int pri) {
     mbox_create(&mb);
 
     tcb_t *control_block = malloc(sizeof(tcb_t));
-    printf("Allocated %d bytes at 0x%08X for *control_block in function t_create()\n", sizeof(tcb_t), control_block);
+    printf("+++ Allocated %d bytes at 0x%08X for *control_block in function t_create()\n", sizeof(tcb_t), control_block);
     control_block->thread_id = id;
     control_block->thread_priority = pri;
     control_block->thread_context = uc;
@@ -91,7 +91,7 @@ int t_create (void (*fct)(int), int id, int pri) {
     control_block->next = NULL;
 
     tcb_lln_t *node = malloc(sizeof(tcb_lln_t));
-    printf("Allocated %d bytes at 0x%08X for *node in function t_create()\n", sizeof(tcb_lln_t), node);
+    printf("+++ Allocated %d bytes at 0x%08X for *node in function t_create()\n", sizeof(tcb_lln_t), node);
     node->tcb = control_block;
     node->next = NULL;
     
@@ -119,9 +119,12 @@ void t_terminate () {
     running->next = NULL;
 
     free(temp->thread_context->uc_stack.ss_sp);
+    printf("--- Freed 0x%08X in function t_terminate\n", temp->thread_context->uc_stack.ss_sp);
     free(temp->thread_context);
+    printf("--- Freed 0x%08X in function t_terminate\n", temp->thread_context);
     mbox_destroy(&(temp->mb));
     free(temp);
+    printf("-- Freed 0x%08X in function t_terminate\n", temp);
 
     setcontext(running->thread_context);
 }
@@ -129,22 +132,29 @@ void t_terminate () {
 void t_shutdown () {
 
     free(running->thread_context->uc_stack.ss_sp);
+    printf("--- Freed 0x%08X in function t_shutdown\n", running->thread_context->uc_stack.ss_sp);
     free(running->thread_context);
+    printf("--- Freed 0x%08X in function t_shutdown\n", running->thread_context);
     mbox_destroy(&(running->mb));
     free(running);
+    printf("--- Freed 0x%08X in function t_shutdown\n", running);
 
     while (ready_queue_head) {
         tcb_t *temp = ready_queue_head->next;
         free(ready_queue_head->thread_context->uc_stack.ss_sp);
+        printf("--- Freed 0x%08X in function t_shutdown\n", ready_queue_head->thread_context->uc_stack.ss_sp);
         free(ready_queue_head->thread_context);
+        printf("--- Freed 0x%08X in function t_shutdown\n", ready_queue_head->thread_context);
         mbox_destroy(&(ready_queue_head->mb));
         free(ready_queue_head);
+        printf("--- Freed 0x%08X in function t_shutdown\n", ready_queue_head);
         ready_queue_head = temp;
     }
 
     while (thread_list) {
         tcb_lln_t *temp = thread_list->next;
         free(thread_list);
+        printf("--- Freed 0x%08X in function t_shutdown\n", thread_list);
         thread_list = temp;
     }
 }
@@ -152,7 +162,7 @@ void t_shutdown () {
 int sem_init(sem_t **sp, unsigned int count) {
     
     *sp = (sem_t *) malloc(sizeof(sem_t));
-    printf("Allocated %d bytes at 0x%08X for *sp in function sem_init()\n", sizeof(sem_t), sp);
+    printf("+++ Allocated %d bytes at 0x%08X for *sp in function sem_init()\n", sizeof(sem_t), sp);
     (*sp)->count = count;
     (*sp)->queue = NULL;
 
@@ -224,12 +234,16 @@ void sem_destroy(sem_t **sp) {
     while ((*sp)->queue) {
         tcb_t *temp = (*sp)->queue->next;
         free((*sp)->queue->thread_context->uc_stack.ss_sp);
+        printf("--- Freed 0x%08X in function sem_destroy\n", (*sp)->queue->thread_context->uc_stack.ss_sp);
         free((*sp)->queue->thread_context);
+        printf("--- Freed 0x%08X in function sem_destroy\n", (*sp)->queue->thread_context);
         free((*sp)->queue);
+        printf("--- Freed 0x%08X in function sem_destroy\n", (*sp)->queue);
         (*sp)->queue = temp;
     }
 
     free((*sp));
+    printf("--- Freed 0x%08X in function sem_destroy\n", (*sp));
 }
 
 void print_mnode_list(mnode_t *node) {
@@ -247,7 +261,7 @@ int mbox_create(mbox **mb) {
     sem_init(&semaphore, -1);
 
     *mb = (mbox *) malloc(sizeof(mbox));
-    printf("Allocated %d bytes at 0x%08X for *mb in function mbox_create()\n", sizeof(mbox), mb);
+    printf("+++ Allocated %d bytes at 0x%08X for *mb in function mbox_create()\n", sizeof(mbox), mb);
     (*mb)->mnode = NULL;
     (*mb)->sem = semaphore;
 
@@ -261,23 +275,26 @@ void mbox_destroy(mbox **mb) {
     while (message_node) {
         mnode_t *temp = message_node->next;
         free(message_node->msg);
+        printf("--- Freed 0x%08X in function sem_destroy\n", message_node->msg);
         free(message_node);
+        printf("--- Freed 0x%08X in function sem_destroy\n", message_node);
         message_node = temp;
     }
 
     sem_destroy(&((*mb)->sem));
 
     free((*mb));
+    printf("--- Freed 0x%08X in function sem_destroy\n", (*mb));
 }
 
 void mbox_deposit(mbox *mb, char *msg, int len) {
 
     char *message = malloc(sizeof(char) * (len + 1));
-    printf("Allocated %d bytes at 0x%08X for *message in function mbox_deposit()\n", sizeof(char) * (len + 1), message);
+    printf("+++ Allocated %d bytes at 0x%08X for *message in function mbox_deposit()\n", sizeof(char) * (len + 1), message);
     strcpy(message, msg);
 
     mnode_t *message_node = malloc(sizeof(mnode_t));
-    printf("Allocated %d bytes at 0x%08X for *message_node in function mbox_deposit()\n", sizeof(mnode_t), message_node);
+    printf("+++ Allocated %d bytes at 0x%08X for *message_node in function mbox_deposit()\n", sizeof(mnode_t), message_node);
     message_node->msg = message;
     message_node->len = len;
     message_node->sender = -1;
@@ -317,7 +334,9 @@ void mbox_withdraw(mbox *mb, char *msg, int *len) {
     }
 
     free(message_node->msg);
+    printf("--- Freed 0x%08X in function mbox_withdraw\n", message_node->msg);
     free(message_node);
+    printf("--- Freed 0x%08X in function mbox_withdraw\n", message_node);
 }
 
 void send(int tid, char *msg, int len) {
@@ -342,9 +361,9 @@ void send(int tid, char *msg, int len) {
     }
 
     mnode_t *message_node = malloc(sizeof(mnode_t));
-    printf("Allocated %d bytes at 0x%08X for *message_node in function send()\n", sizeof(mnode_t), message_node);
+    printf("+++ Allocated %d bytes at 0x%08X for *message_node in function send()\n", sizeof(mnode_t), message_node);
     message_node->msg = malloc(sizeof(char) * (len + 1));
-    printf("Allocated %d bytes at 0x%08X for message_node->msg in function send()\n", sizeof(char) * (len + 1), message_node->msg);
+    printf("+++ Allocated %d bytes at 0x%08X for message_node->msg in function send()\n", sizeof(char) * (len + 1), message_node->msg);
     strcpy(message_node->msg, msg);
     message_node->len = len;
     message_node->sender = sender_id;
@@ -405,7 +424,9 @@ void receive(int *tid, char *msg, int *len) {
         running->mb->sem->count--;
 
         free(found->msg);
+        printf("--- Freed 0x%08X in function mbox_withdraw\n" found->msg);
         free(found);
+        printf("--- Freed 0x%08X in function mbox_withdraw\n", found);
     } else {
         *len = 0;
     }
@@ -432,9 +453,9 @@ void block_send(int tid, char *msg, int length) {
     }
 
     mnode_t *message_node = malloc(sizeof(mnode_t));
-    printf("Allocated %d bytes at 0x%08X for *message_node in function block_send()\n", sizeof(mnode_t), message_node);
+    printf("+++ Allocated %d bytes at 0x%08X for *message_node in function block_send()\n", sizeof(mnode_t), message_node);
     message_node->msg = malloc(sizeof(char) * (length + 1));
-    printf("Allocated %d bytes at 0x%08X for message_node->msg in function block_send()\n", sizeof(char) * (length + 1), message_node->msg);
+    printf("+++ Allocated %d bytes at 0x%08X for message_node->msg in function block_send()\n", sizeof(char) * (length + 1), message_node->msg);
     strcpy(message_node->msg, msg);
     message_node->len = length;
     message_node->sender = sender_id;
@@ -500,7 +521,9 @@ void block_receive(int *tid, char *msg, int *length) {
         running->mb->sem->count--;
 
         free(found->msg);
+        printf("--- Freed 0x%08X in function mbox_withdraw\n", found->msg);
         free(found);
+        printf("--- Freed 0x%08X in function mbox_withdraw\n", found);
     } else {
         *length = 0;
     }
