@@ -527,6 +527,7 @@ void send(int tid, char *msg, int len) {
     if (IS_DEBUGGING) {
         printf("\t-------------------------------------------------------\n");
         printf("\tA message was sent!\n");
+        print_thread_list();
         printf("\tSender TID: %d\n", sender_id);
         printf("\tReceiver TID: %d\n", receiver_id);
         printf("\tMessage: \"%s\"\n", msg);
@@ -670,6 +671,7 @@ void block_send(int tid, char *msg, int length) {
     if (IS_DEBUGGING) {
         printf("\t-------------------------------------------------------\n");
         printf("\tA message was sent with blocking!\n");
+        print_thread_list();
         printf("\tSender TID: %d\n", sender_id);
         printf("\tReceiver TID: %d\n", receiver_id);
         printf("\tMessage: \"%s\"\n", msg);
