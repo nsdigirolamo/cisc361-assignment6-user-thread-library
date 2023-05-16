@@ -583,13 +583,13 @@ void receive(int *tid, char *msg, int *len) {
         sem_wait(running->mb->sem);
     }
 
-    if (IS_DEBUGGING) { printf("Sequence: "); }
+    if (IS_DEBUGGING) { printf("\tSequence: "); }
     while (message_node->next) {
         previous = message_node;
         message_node = message_node->next;
         if (IS_DEBUGGING) { printf("0x%08X -> ", previous); }
     }
-    if (IS_DEBUGGING) { printf("NULL"); }
+    if (IS_DEBUGGING) { printf("NULL\n"); }
 
     if (IS_DEBUGGING) {
         printf("\tEarliest message node -----------------------------------\n");
