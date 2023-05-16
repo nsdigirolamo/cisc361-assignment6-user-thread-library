@@ -434,7 +434,7 @@ void block_send(int tid, char *msg, int length) {
     mnode_t *message_node = malloc(sizeof(mnode_t));
     printf("Allocated %d bytes at 0x%08X for *message_node in function block_send()", sizeof(mnode_t), message_node);
     message_node->msg = malloc(sizeof(char) * (length + 1));
-    printf("Allocated %d bytes at 0x%08X for message_node->msg in function block_send()", sizeof(char) * (len + 1), message_node->msg);
+    printf("Allocated %d bytes at 0x%08X for message_node->msg in function block_send()", sizeof(char) * (length + 1), message_node->msg);
     strcpy(message_node->msg, msg);
     message_node->len = length;
     message_node->sender = sender_id;
