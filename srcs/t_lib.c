@@ -686,7 +686,7 @@ void block_send(int tid, char *msg, int length) {
     mnode_t *message_node = malloc(sizeof(mnode_t));
     message_node->msg = malloc(sizeof(char) * (length + 1));
     strcpy(message_node->msg, msg);
-    message_node->len = len;
+    message_node->len = length;
     message_node->sender = sender_id;
     message_node->receiver = receiver_id;
     
