@@ -581,13 +581,18 @@ void receive(int *tid, char *msg, int *len) {
         sem_wait(running->mb->sem);
     }
 
+    printf("\tEarliest message node -----------------------------------\n");
+    printf("\tSequence:");
+
     if (message_node->next) {
+        printf(" 0x%08X ->", message_node);
         previous = message_node;
         message_node = message_node->next;
     }
 
+    printf(" NULL\n");
+
     if (IS_DEBUGGING) {
-        printf("\tEarliest message node -----------------------------------\n");
         printf("\tMessage Node: 0x%08X: {\n", message_node);
         printf("\t\tMessage: \"%s\"\n", message_node->msg);
         printf("\t\tLength: %d\n", message_node->len);
